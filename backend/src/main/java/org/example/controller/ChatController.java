@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import io.micrometer.common.lang.Nullable;
 import org.example.dao.Chat;
 import org.example.dao.User;
 import org.example.repo.ChatRepo;
@@ -11,8 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 @Controller
-@RequestMapping(path="user")
+@RequestMapping(path="/chat")
 public class ChatController {
     @Autowired
     ChatRepo repo;
@@ -22,10 +25,12 @@ public class ChatController {
 
     @PostMapping(path="/add")
     public String addChat(@RequestParam String chatName,
-                          @RequestParam @Nullable String chatType) {
-//        Set<User> u = (Set<User>) userRepo.findAllById(users);
+                          @RequestParam String chatType,
+                          @RequestParam String[] usernames) {
 
-        repo.save(new Chat(chatName, chatType));
+        Set<User> u = (HashSet<User>) userRepo.findAllById(Arrays.asList(usernames));
+
+        repo.save(new Chat(chatName, chatType, null));
         return "saved";
     }
 

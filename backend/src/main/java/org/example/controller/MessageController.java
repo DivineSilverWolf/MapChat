@@ -1,6 +1,5 @@
 package org.example.controller;
 
-import jakarta.annotation.Nullable;
 import org.example.dao.Message;
 import org.example.dao.User;
 import org.example.repo.MessageRepo;
@@ -11,7 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.sql.Time;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 @Controller
@@ -26,11 +28,21 @@ public class MessageController {
     @PostMapping(path="/add")
     public String addMessage(@RequestParam String username,
                           @RequestParam String messageText,
-                          @RequestParam Time timestamp) {
+                          @RequestParam String timestamp) {
+
+        DateFormat formatter = new SimpleDateFormat("yy:MM:dd:hh:mm:ss");
+        Date date = null;
+        try {
+            date = formatter.parse(timestamp);
+        } catch (ParseException e) {
+            System.out.println("Invalid date");
+        }
 
         Optional<User> user = userRepo.findById(username);
         if (user.isEmpty()) return "no such user";
-        messageRepo.save(new Message(user.get(), messageText, timestamp));
+
+        messageRepo.save(new Message(user.get(), messageText, date));
+
         return "saved";
     }
 

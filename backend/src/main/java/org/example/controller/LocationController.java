@@ -11,21 +11,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.sql.Time;
 
 @Controller
-@RequestMapping(path="/location")
+@RequestMapping("/location")
 public class LocationController {
-
     @Autowired
     LocationRepo repo;
 
-    @PostMapping(path="/add")
-    public String addLocation(@RequestParam Integer latitude,
-                          @RequestParam Integer longitude,
-                          @RequestParam Time timestamp) {
-        repo.save(new Location(latitude, longitude, timestamp));
-        return "saved";
-    }
+//    @PostMapping("/add")
+//    public String addLocation(@RequestParam("latitude") Integer latitude,
+//                          @RequestParam("latitude") Integer longitude,
+//                          @RequestParam("timestamp") String timestamp) {
+//        repo.save(new Location(latitude, longitude, timestamp));
+//        return "saved";
+//    }
 
-    @PostMapping(path="/delete")
+    @PostMapping("/delete")
     public String deleteLocation(@RequestParam Long id) {
         repo.deleteById(id);
         return "deleted";
