@@ -29,7 +29,7 @@ public class UserController {
                           @RequestParam("password") String password,
                           @RequestParam("email") String email,
                           @RequestParam("avatarURL") String avatarURL) {
-        repo.save(new User(username, password, avatarURL, email, null, null, null));
+        repo.save(new User(username, password, avatarURL, email, true, null, null, null));
         return "saved";
     }
 

@@ -21,6 +21,7 @@ public class User {
     String password;
     String avatarURL;
     String email;
+    Boolean isOnline;
 
     @OneToOne
     @JoinColumn(name = "location_id")
