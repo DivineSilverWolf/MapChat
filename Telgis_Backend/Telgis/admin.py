@@ -1,3 +1,20 @@
 from django.contrib import admin
 
 # Register your models here.
+from .models import Messages, Chats, ChatMembers, Locations, Friends, Users
+
+
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'avatar_url')
+
+
+
+admin.site.register(Users, UserAdmin)
+admin.site.register(Messages)
+admin.site.register(Locations)
+admin.site.register(Friends)
+admin.site.register(Chats)
+admin.site.register(ChatMembers)
+
+admin.site.site_header = "Админ-панель Telgis"
+admin.site.site_title = "Админ"
