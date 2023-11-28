@@ -11,6 +11,22 @@ def add_user(request):
     username = data['username']
     email = data['email']
     password = data['password_hash']
+
+    if Users.objects.filter(username=username).exists():
+        return JsonResponse({'status': 'error', 'message': 'User already exists'})
+
+    if len(username) < 6 or len(username) > 20:
+        return JsonResponse({'status': 'error', 'message': 'Username must be between 6 and 20 characters'})
+    if not username.isalnum():
+        return JsonResponse({'status': 'error', 'message': 'Username can only contain letters and numbers'})
+
+    if len(password) < 6 or len(password) > 20:
+        return JsonResponse({'status': 'error', 'message': 'Password must be between 6 and 20 characters'})
+    if not any(char.isdigit() for char in password):
+        return JsonResponse({'status': 'error', 'message': 'Password must contain at least one digit'})
+    if not any(char in '!@#$%^&*()_+-=[]{}|;:,.<>?`~' for char in password):
+        return JsonResponse({'status': 'error', 'message': 'Password must contain at least one special character'})
+
     avatar_url = data['avatar_url']
     status = data['status']
 
