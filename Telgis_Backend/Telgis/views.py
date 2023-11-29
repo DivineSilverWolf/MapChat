@@ -8,6 +8,7 @@ from .models import Users
 
 def add_user(request):
     data = json.loads(request.body)
+
     username = data['username']
     email = data['email']
     password = data['password_hash']
@@ -49,7 +50,6 @@ def edit_user(request):
 
     username = data['username']
     email = data['email']
-    password = data['password_hash']
     avatar_url = data['avatar_url']
     status = data['status']
 
@@ -90,3 +90,30 @@ def user_id_details(request, user_id):
         return delete_user(user)
     else:
         return HttpResponse('Invalid Request')
+
+@csrf_exempt
+def login(request):
+    if request.method != 'POST':
+        return HttpResponse('Invalid Request')
+
+    data = json.loads(request.body)
+
+    if data.get('username') is None or data.get('password') is None:
+        return JsonResponse({'status': 'error', 'message': 'Username and password cannot be empty'})
+
+    username = data['username']
+    password = data['password']
+
+    if not Users.objects.filter(username=username).exists():
+        return JsonResponse({'status': 'error', 'message': 'User not found'})
+
+    user = get_object_or_404(Users, username=username)
+
+    if(user.password_hash == password):
+        return JsonResponse({'status': 'Login successful'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Incorrect password'})
+
+
+
+
