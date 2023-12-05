@@ -9,31 +9,32 @@ from .models import Users
 def add_user(request):
     data = json.loads(request.body)
 
-    username = data['username']
+    username = data['login']
     email = data['email']
-    password = data['password_hash']
+    password = data['pass']
 
     if Users.objects.filter(username=username).exists():
-        return JsonResponse({'status': 'error', 'message': 'User already exists'})
+        return JsonResponse({'message': 'User already exists'})
 
     if len(username) < 6 or len(username) > 20:
-        return JsonResponse({'status': 'error', 'message': 'Username must be between 6 and 20 characters'})
+        return JsonResponse({'message': 'Username must be between 6 and 20 characters'})
     if not username.isalnum():
-        return JsonResponse({'status': 'error', 'message': 'Username can only contain letters and numbers'})
+        return JsonResponse({'message': 'Username can only contain letters and numbers'})
 
     if len(password) < 6 or len(password) > 20:
-        return JsonResponse({'status': 'error', 'message': 'Password must be between 6 and 20 characters'})
+        return JsonResponse({'message': 'Password must be between 6 and 20 characters'})
     if not any(char.isdigit() for char in password):
-        return JsonResponse({'status': 'error', 'message': 'Password must contain at least one digit'})
+        return JsonResponse({'message': 'Password must contain at least one digit'})
     if not any(char in '!@#$%^&*()_+-=[]{}|;:,.<>?`~' for char in password):
-        return JsonResponse({'status': 'error', 'message': 'Password must contain at least one special character'})
+        return JsonResponse({'message': 'Password must contain at least one special character'})
 
     avatar_url = data['avatar_url']
     status = data['status']
 
     users = Users(username=username, email=email, password_hash=password, avatar_url=avatar_url, status=status)
     users.save()
-    return JsonResponse({'status': 'success'})
+
+    return JsonResponse({'login': username})
 
 
 def delete_user(user):
@@ -46,7 +47,7 @@ def edit_user(request):
     user = data['user']
 
     if not Users.objects.filter(user=user).exists():
-        return JsonResponse({'status': 'error', 'message': 'User not found'})
+        return JsonResponse({'message': 'User not found'})
 
     username = data['username']
     email = data['email']
@@ -98,21 +99,24 @@ def login(request):
 
     data = json.loads(request.body)
 
-    if data.get('username') is None or data.get('password') is None:
-        return JsonResponse({'status': 'error', 'message': 'Username and password cannot be empty'})
+    if data.get('login') is None or data.get('pass') is None:
+        return JsonResponse({'message': 'Username and password cannot be empty'})
 
-    username = data['username']
-    password = data['password']
+    username = data['login']
+    password = data['pass']
 
     if not Users.objects.filter(username=username).exists():
-        return JsonResponse({'status': 'error', 'message': 'User not found'})
+        return JsonResponse({'message': 'User not found'}, status=404)
 
     user = get_object_or_404(Users, username=username)
 
     if(user.password_hash == password):
-        return JsonResponse({'status': 'Login successful'})
+        user.status = 'online'
+        user.save()
+
+        return JsonResponse({'login': username})
     else:
-        return JsonResponse({'status': 'error', 'message': 'Incorrect password'})
+        return JsonResponse({'message': 'Incorrect password'})
 
 
 
