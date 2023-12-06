@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Telgis.apps.TelgisConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
