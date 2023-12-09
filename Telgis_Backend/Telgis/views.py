@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Users, Friends
+from .models import Users, Friends, Chats, ChatMembers
 from .serializers import UserSerializer
 
 
@@ -147,3 +147,19 @@ class FindFriendView(APIView):
                 return Response("No potential friends found", status=status.HTTP_404_NOT_FOUND)
         else:
             return Response("No users found", status=status.HTTP_404_NOT_FOUND)
+
+
+class ChatView(APIView):
+    def post(self, request, login):
+        friends = request.data.get('friends', [])
+
+        chat = Chats.objects.create(chat_name="", chat_type="")
+
+        user = Users.objects.get(login=login)
+        ChatMembers.objects.create(chat_id=chat, login=user.login)
+
+        for friend in friends:
+            user = Users.objects.get(login=friend)
+            ChatMembers.objects.create(chat_id=chat, login=user.login)
+
+        return Response(status=status.HTTP_200_OK)
