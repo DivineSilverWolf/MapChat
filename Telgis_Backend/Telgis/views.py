@@ -1,76 +1,100 @@
 import json
 
+import rest_framework.request
+from django.contrib.auth.hashers import make_password, check_password
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
 
+from .decorators import *
 from .models import Users
 
-def add_user(request):
-    data = json.loads(request.body)
-    username = data['username']
-    email = data['email']
-    password = data['password_hash']
-    avatar_url = data['avatar_url']
-    status = data['status']
 
-    users = Users(username=username, email=email, password_hash=password, avatar_url=avatar_url, status=status)
-    users.save()
-    return JsonResponse({'status': 'success'})
+@check_auth_schema
+class Authentication(APIView):
 
+    @csrf_exempt
+    def post(self, request, login):
+        try:
+            password = request.data.get('password_hash')
 
-def delete_user(user):
-    user.delete()
-    return JsonResponse({'status': 'success'})
+            # # Проверка, что получены и username, и password
+            # if not username or not password:
+            #     return JsonResponse({'status': 'error', 'message': 'Username and password are required'}, status=400)
 
+            user = get_object_or_404(Users, login=login)
+            if check_password(password, user.password_hash):
 
-def edit_user(request):
-    data = json.loads(request.body)
-    user = data['user']
+                return JsonResponse({'status': 'login'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
 
-    if not Users.objects.filter(user=user).exists():
-        return JsonResponse({'status': 'error', 'message': 'User not found'})
-
-    username = data['username']
-    email = data['email']
-    password = data['password_hash']
-    avatar_url = data['avatar_url']
-    status = data['status']
-
-    users = Users(user=user, username=username, email=email, password_hash=password, avatar_url=avatar_url,
-                  status=status)
-    users.save()
-    return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
-def get_user(user):
-    data = {
-        'user': user.user,
-        'username': user.username,
-        'email': user.email,
-        'password_hash': user.password_hash,
-        'avatar_url': user.avatar_url,
-        'status': user.status
-    }
-    return JsonResponse(data)
+@check_reg_schema
+class Registration(APIView):
+
+    @csrf_exempt
+    def post(self, request: rest_framework.request.Request):
+        try:
+            print(request.POST)
+            data = request.data[0]
+            print(data)
+            login = data['login']
+            password = data['password_hash']
+            avatar_url = data['avatar_url']
+            status = "online"
+            if Users.objects.filter(login=login).exists():
+                return JsonResponse({'status': 'error', 'message': 'User already exists'}, status=400)
+
+            users = Users(login=login, password_hash=make_password(password), avatar_url=avatar_url, status=status)
+            users.save()
+            return JsonResponse({'status': 'login'})
+        except Exception as e:
+            print(f"Error in Registration view: {e}")
+            return JsonResponse({'status': 'error', 'message': 'Internal Server Error'}, status=500)
+
+    # @csrf_exempt
+    # def patch(self, request):
+    #     try:
+    #         data = request.data[0]
+    #         login = data['login']
+    #
+    #         if not Users.objects.filter(login=login).exists():
+    #             return JsonResponse({'status': 'error', 'message': 'User not found'})
+    #
+    #         password = data['password_hash']
+    #         avatar_url = data['avatar_url']
+    #         status = data['status']
+    #
+    #         Users.objects.filter(login=login).update(password_hash=password, avatar_url=avatar_url,
+    #                                                  status=status)
+    #         return JsonResponse({'status': 'success'})
+    #     except KeyError as e:
+    #         return JsonResponse({'status': 'error', 'message': f'Missing key: {str(e)}'})
+    #
+    #     except Exception as e:
+    #         return JsonResponse({'status': 'error', 'message': str(e)})
 
 
-@csrf_exempt
-def user_details(request):
-    if request.method == 'POST':
-        return add_user(request)
-    elif request.method == 'PATCH':
-        return edit_user(request)
-    else:
-        return HttpResponse('Invalid Request')
+@check_get_schema
+class UserIdDetails(APIView):
+    @csrf_exempt
+    def get(self, request, login):
+        user = get_object_or_404(Users, login=login)
+        data = {
+            'login': user.login,
+            'password_hash': user.password_hash,
+            'avatar_url': user.avatar_url,
+            'status': user.status
+        }
+        return JsonResponse(data)
 
-
-@csrf_exempt
-def user_id_details(request, user_id):
-    user = get_object_or_404(Users, user=user_id)
-    if request.method == 'GET':
-        return get_user(user)
-    elif request.method == 'DELETE':
-        return delete_user(user)
-    else:
-        return HttpResponse('Invalid Request')
+    @csrf_exempt
+    def delete(self, requset, login):
+        user = get_object_or_404(Users, login=login)
+        user.delete()
+        return JsonResponse({'status': 'success'})

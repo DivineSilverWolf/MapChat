@@ -1,9 +1,11 @@
 from django.urls import path
 
-from Telgis import views
+from . import views
 
 urlpatterns = [
-    path('<int:user_id>/', views.user_id_details),
-    path('', views.user_details)
+    path('registration/', views.Registration.as_view(), name='register'),
+    path('auth/<str:login>', views.Authentication.as_view(), name='login'),
+    path('<str:login>/', views.UserIdDetails.as_view()),
+
 ]
 

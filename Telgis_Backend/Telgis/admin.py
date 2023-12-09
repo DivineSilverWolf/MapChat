@@ -4,12 +4,12 @@ from django.contrib import admin
 from .models import Messages, Chats, ChatMembers, Locations, Friends, Users
 
 
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'avatar_url')
+# class UserAdmin(admin.ModelAdmin):
+#     list_display = ('username', 'email', 'avatar_url')
 
 
 
-admin.site.register(Users, UserAdmin)
+admin.site.register(Users)
 admin.site.register(Messages)
 admin.site.register(Locations)
 admin.site.register(Friends)
