@@ -13,35 +13,42 @@ from .serializers import UserSerializer
 
 
 class UserView:
-    def add_user(self, request):
+    @csrf_exempt
+    def register(request):
+        if request.method != 'POST':
+            return HttpResponse('Invalid Request')
+
         data = json.loads(request.body)
 
-        username = data['login']
-        email = data['email']
-        password = data['pass']
+        if data.get('login') is None or data.get('password') is None:
+            return JsonResponse({'message': 'Login and password cannot be empty'}, status=400)
 
-        if Users.objects.filter(username=username).exists():
-            return JsonResponse({'message': 'User already exists'})
+        login = data['login']
+        password = data['password']
 
-        if len(username) < 6 or len(username) > 20:
-            return JsonResponse({'message': 'Username must be between 6 and 20 characters'})
-        if not username.isalnum():
-            return JsonResponse({'message': 'Username can only contain letters and numbers'})
+        if Users.objects.filter(login=login).exists():
+            return JsonResponse({'message': 'User already exists'}, status=400)
+
+        if len(login) < 6 or len(login) > 20:
+            return JsonResponse({'message': 'Login must be between 6 and 20 characters'}, status=400)
+        if not login.isalnum():
+            return JsonResponse({'message': 'Login can only contain letters and numbers'}, status=400 )
 
         if len(password) < 6 or len(password) > 20:
-            return JsonResponse({'message': 'Password must be between 6 and 20 characters'})
+            return JsonResponse({'message': 'Password must be between 6 and 20 characters'}, status=400)
         if not any(char.isdigit() for char in password):
-            return JsonResponse({'message': 'Password must contain at least one digit'})
+            return JsonResponse({'message': 'Password must contain at least one digit'}, status=400)
         if not any(char in '!@#$%^&*()_+-=[]{}|;:,.<>?`~' for char in password):
-            return JsonResponse({'message': 'Password must contain at least one special character'})
+            return JsonResponse({'message': 'Password must contain at least one special character'}, status=400)
 
-        avatar_url = data['avatar_url']
-        status = data['status']
+        avatar_url = ""
+        status = "offline"
 
-        users = Users(username=username, email=email, password_hash=password, avatar_url=avatar_url, status=status)
+        #users = Users(username=username, email=email, password_hash=password, avatar_url=avatar_url, status=status)
+        users = Users(login=login, password_hash=password, avatar_url=avatar_url, status=status)
         users.save()
 
-        return JsonResponse({'login': username})
+        return JsonResponse({'login': login})
 
     def delete_user(self, user):
         user.delete()
@@ -98,42 +105,40 @@ class UserView:
             return HttpResponse('Invalid Request')
 
     @csrf_exempt
-    def login(request):
+    def login(request, login):
         if request.method != 'POST':
             return HttpResponse('Invalid Request')
 
         data = json.loads(request.body)
 
-        if data.get('login') is None or data.get('pass') is None:
-            return JsonResponse({'message': 'Username and password cannot be empty'})
+        if data.get('password') is None:
+            return JsonResponse({'message': 'Password cannot be empty'}, status=400)
 
-        username = data['login']
-        password = data['pass']
+        password = data['password']
 
-        if not Users.objects.filter(username=username).exists():
+        if not Users.objects.filter(login=login).exists():
             return JsonResponse({'message': 'User not found'}, status=404)
 
-        user = get_object_or_404(Users, username=username)
+        user = get_object_or_404(Users, login=login)
 
         if (user.password_hash == password):
             user.status = 'online'
             user.save()
 
-            return JsonResponse({'login': username})
+            return JsonResponse({'login': login})
         else:
-            return JsonResponse({'message': 'Incorrect password'})
+            return JsonResponse({'message': 'Incorrect password'}, status=400)
 
 
 class FindFriendView(APIView):
-    def post(self, request):
-        user_login = request.data.get('login')
-        friend_login = request.data.get('friend_login')
+    def post(self, request, login):
+        friend_login = request.data.get('login')
 
-        similar_users = Users.objects.filter(username__icontains=friend_login).exclude(username=user_login)
+        similar_users = Users.objects.filter(login__icontains=friend_login).exclude(login=login)
 
         if similar_users.exists():
             potential_friends = [user for user in similar_users if
-                                 not Friends.objects.filter(user_id=user.user, friend_id__username=user_login).exists()]
+                                 not Friends.objects.filter(login_friend_one=user.login, login_friend_two=login).exists()]
 
             if potential_friends:
                 serializer = UserSerializer(potential_friends, many=True)

@@ -5,4 +5,4 @@ from Telgis.models import Users
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ['user', 'username']
+        fields = ['login']
