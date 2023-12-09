@@ -122,9 +122,17 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 REST_FRAMEWORK = {
     # ВАШИ НАСТРОЙКИ
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "API Telgis",  # название проекта
+    "VERSION": "0.2.0",  # версия проекта
+    "SERVE_INCLUDE_SCHEMA": False,  # исключить эндпоинт /schema
+    # "SWAGGER_UI_SETTINGS": {
+    #     "filter": True,  # включить поиск по тегам
+    # },
+    "COMPONENT_SPLIT_REQUEST": True
+}

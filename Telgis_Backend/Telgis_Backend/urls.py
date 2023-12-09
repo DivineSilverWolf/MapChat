@@ -22,9 +22,7 @@ urlpatterns = [
 
     path('', include('Telgis.urls')),
     path('admin/', admin.site.urls),
-
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
-
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
 
 ]
