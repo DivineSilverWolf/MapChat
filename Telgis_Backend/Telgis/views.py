@@ -41,19 +41,20 @@ class Authentication(APIView):
     @csrf_exempt
     def post(self, request, login):
         try:
-            password = request.data.get('password_hash')
+            password = request.data.get('password')
 
             # # Проверка, что получены и username, и password
             # if not username or not password:
             #     return JsonResponse({'status': 'error', 'message': 'Username and password are required'}, status=400)
 
             user = get_object_or_404(Users, login=login)
+            print(user.login, user.password_hash)
+
             if check_password(password, user.password_hash):
 
                 return JsonResponse({'status': 'login'})
             else:
                 return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
-            return JsonResponse({'status': 'login'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
@@ -67,7 +68,7 @@ class Registration(APIView):
             data = request.data
             print(data)
             login = data['login']
-            password = make_password(data['password'])
+            password = data['password']
             avatar_url = "none"
             status = "online"
             if Users.objects.filter(login=login).exists():
