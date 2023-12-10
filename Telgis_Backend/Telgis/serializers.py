@@ -12,7 +12,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Users
-        fields = ['login', 'password_hash', 'avatar_url']
+        fields = ['login', 'password_hash']
 
 
 class AuthSerializer(serializers.ModelSerializer):

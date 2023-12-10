@@ -37,7 +37,6 @@ check_reg_schema = extend_schema_view(
                     "{\n\n"
                     '    "login": "example",\n\n'
                     '    "password": "password_hash"\n\n'
-                    '    "avatar_url": "url",\n\n'
                     "}",
         responses={
             200: OpenApiResponse(

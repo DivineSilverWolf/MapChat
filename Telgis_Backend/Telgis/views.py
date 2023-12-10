@@ -11,6 +11,30 @@ from .decorators import *
 from .models import Users
 
 
+class AddFriend(APIView):
+
+    def post(self, request, login):
+        pass
+
+
+class FriendsList(APIView):
+
+    def post(self, request):
+        pass
+
+
+class FriendsConfirm(APIView):
+
+    def get(self, request):
+        pass
+
+
+class FindFriends(APIView):
+
+    def post(self, request, login):
+        pass
+
+
 @check_auth_schema
 class Authentication(APIView):
 
@@ -29,7 +53,7 @@ class Authentication(APIView):
                 return JsonResponse({'status': 'login'})
             else:
                 return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
-
+            return JsonResponse({'status': 'login'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
@@ -38,26 +62,26 @@ class Authentication(APIView):
 class Registration(APIView):
 
     @csrf_exempt
-    def post(self, request: rest_framework.request.Request):
+    def post(self, request):        #: rest_framework.request.Request
         try:
-            print(request.POST)
-            data = request.data[0]
+            data = request.data
             print(data)
             login = data['login']
-            password = data['password_hash']
-            avatar_url = data['avatar_url']
+            password = make_password(data['password'])
+            avatar_url = "none"
             status = "online"
             if Users.objects.filter(login=login).exists():
                 return JsonResponse({'status': 'error', 'message': 'User already exists'}, status=400)
 
             users = Users(login=login, password_hash=make_password(password), avatar_url=avatar_url, status=status)
             users.save()
-            return JsonResponse({'status': 'login'})
+            print("OK")
+            return JsonResponse({"status": "success"})
+
         except Exception as e:
             print(f"Error in Registration view: {e}")
             return JsonResponse({'status': 'error', 'message': 'Internal Server Error'}, status=500)
 
-    # @csrf_exempt
     # def patch(self, request):
     #     try:
     #         data = request.data[0]
