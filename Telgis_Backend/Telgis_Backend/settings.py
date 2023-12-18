@@ -26,6 +26,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["85.193.80.248", "127.0.0.1"]
 
+APPEND_SLASH = False
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -107,9 +109,9 @@ WSGI_APPLICATION = 'Telgis_Backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('POSTGRES_DB'),               #os.environ.get('POSTGRES_DB')
-        'USER': os.environ.get('POSTGRES_USER'),               #os.environ.get('POSTGRES_USER')
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),           #os.environ.get('POSTGRES_PASSWORD')
+        'NAME': os.environ.get('POSTGRES_DB'),  # os.environ.get('POSTGRES_DB')
+        'USER': os.environ.get('POSTGRES_USER'),  # os.environ.get('POSTGRES_USER')
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),  # os.environ.get('POSTGRES_PASSWORD')
         'HOST': 'postgres',
         'PORT': 5432,
     }
