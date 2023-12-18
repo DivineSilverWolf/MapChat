@@ -13,7 +13,7 @@ check_auth_schema = extend_schema_view(
         description="Этот метод позволяет пройти аутентификацию\n\n"
                     "Пример POST-запроса:\n\n"
                     "{\n\n"
-                    '    "password_hash": "password_hash"\n\n'
+                    '    "password": "password"\n\n'
                     "}",
         responses={
             200: OpenApiResponse(
@@ -30,7 +30,7 @@ check_auth_schema = extend_schema_view(
 )
 check_reg_schema = extend_schema_view(
     post=extend_schema(
-        request=RegisterSerializer(many=True),
+        request=RegisterSerializer(),
         summary="Метод для регистрации пользователей",
         description="Этот метод позволяет добавить пользователя\n\n"
                     "Пример POST-запроса:\n\n"

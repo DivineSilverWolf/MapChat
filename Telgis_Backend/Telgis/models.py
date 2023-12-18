@@ -7,7 +7,7 @@ class Users(models.Model):
         verbose_name_plural = 'Пользователи'
 
     login = models.CharField(primary_key=True, max_length=20, default='none')
-    password_hash = models.CharField(max_length=128)
+    password = models.CharField(max_length=128)
     avatar_url = models.CharField(max_length=120)
     status = models.CharField(max_length=255)
 

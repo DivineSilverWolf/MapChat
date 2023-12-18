@@ -48,9 +48,9 @@ class Authentication(APIView):
             #     return JsonResponse({'status': 'error', 'message': 'Username and password are required'}, status=400)
 
             user = get_object_or_404(Users, login=login)
-            print(user.login, user.password_hash)
+            print(user.login, user.password)
 
-            if check_password(password, user.password_hash):
+            if check_password(password, user.password):
 
                 return JsonResponse({'status': 'login'})
             else:
@@ -74,7 +74,7 @@ class Registration(APIView):
             if Users.objects.filter(login=login).exists():
                 return JsonResponse({'status': 'error', 'message': 'User already exists'}, status=400)
 
-            users = Users(login=login, password_hash=make_password(password), avatar_url=avatar_url, status=status)
+            users = Users(login=login, password=make_password(password), avatar_url=avatar_url, status=status)
             users.save()
             print("OK")
             return JsonResponse({"status": "success"})
@@ -112,7 +112,7 @@ class UserIdDetails(APIView):
         user = get_object_or_404(Users, login=login)
         data = {
             'login': user.login,
-            'password_hash': user.password_hash,
+            'password': user.password,
             'avatar_url': user.avatar_url,
             'status': user.status
         }

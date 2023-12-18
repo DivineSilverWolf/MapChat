@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-9a*!zve%6_919d-&m!%-bg^!0c%_pc+gjt&x)2l)4hbid2we+o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["85.193.80.248"]
+ALLOWED_HOSTS = ["85.193.80.248", "127.0.0.1"]
 
 # Application definition
 
@@ -106,12 +106,12 @@ WSGI_APPLICATION = 'Telgis_Backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get('POSTGRES_ENGINE'),
-        'NAME': os.environ.get('POSTGRES_DB'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('POSTGRES_DB'),               #os.environ.get('POSTGRES_DB')
+        'USER': os.environ.get('POSTGRES_USER'),               #os.environ.get('POSTGRES_USER')
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),           #os.environ.get('POSTGRES_PASSWORD')
+        'HOST': 'postgres',
+        'PORT': 5432,
     }
 }
 
