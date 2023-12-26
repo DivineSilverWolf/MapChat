@@ -9,12 +9,11 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -25,8 +24,9 @@ SECRET_KEY = 'django-insecure-9a*!zve%6_919d-&m!%-bg^!0c%_pc+gjt&x)2l)4hbid2we+o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["85.193.80.248", "127.0.0.1"]
 
+APPEND_SLASH = False
 
 # Application definition
 
@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Telgis.apps.TelgisConfig',
+    'drf_spectacular',
+    'corsheaders',
     'rest_framework',
 ]
 
@@ -49,7 +51,37 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Укажите адрес вашего фронтенда
+    # Добавьте другие разрешенные адреса при необходимости
+]
+
+# Разрешите методы, которые ваш бэкенд должен поддерживать
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Разрешите заголовки, которые ваш бэкенд должен поддерживать
+# CORS_ALLOW_HEADERS = [
+#     'accept',
+#     'accept-encoding',
+#     'authorization',
+#     'content-type',
+#     'dnt',
+#     'origin',
+#     'user-agent',
+#     'x-csrftoken',
+#     'x-requested-with',
+# ]
 
 ROOT_URLCONF = 'Telgis_Backend.urls'
 
@@ -71,21 +103,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Telgis_Backend.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'telgis_db',
-        'USER': 'admin',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
+        'NAME': os.environ.get('POSTGRES_DB'),  # os.environ.get('POSTGRES_DB')
+        'USER': os.environ.get('POSTGRES_USER'),  # os.environ.get('POSTGRES_USER')
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),  # os.environ.get('POSTGRES_PASSWORD')
+        'HOST': 'postgres',
         'PORT': 5432,
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -105,7 +135,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -117,7 +146,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -127,3 +155,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    # ВАШИ НАСТРОЙКИ
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "API Telgis",  # название проекта
+    "VERSION": "0.2.0",  # версия проекта
+    "SERVE_INCLUDE_SCHEMA": False,  # исключить эндпоинт /schema
+    # "SWAGGER_UI_SETTINGS": {
+    #     "filter": True,  # включить поиск по тегам
+    # },
+    "COMPONENT_SPLIT_REQUEST": True
+}

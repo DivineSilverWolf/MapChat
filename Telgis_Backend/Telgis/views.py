@@ -1,5 +1,6 @@
 import json
 
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,8 +9,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Users, Friends, Chats, ChatMembers
-from .serializers import UserSerializer
+from .models import Users, Friends, Chats, ChatMembers, Locations
+from .serializers import UserSerializer, LocationSerializer
 
 
 class UserView:
@@ -44,7 +45,6 @@ class UserView:
         avatar_url = ""
         status = "offline"
 
-        #users = Users(username=username, email=email, password_hash=password, avatar_url=avatar_url, status=status)
         users = Users(login=login, password_hash=password, avatar_url=avatar_url, status=status)
         users.save()
 
@@ -130,7 +130,7 @@ class UserView:
             return JsonResponse({'message': 'Incorrect password'}, status=400)
 
 
-class FindFriendView(APIView):
+class FindFriend(APIView):
     def post(self, request, login):
         friend_login = request.data.get('login')
 
@@ -138,7 +138,8 @@ class FindFriendView(APIView):
 
         if similar_users.exists():
             potential_friends = [user for user in similar_users if
-                                 not Friends.objects.filter(login_friend_one=user.login, login_friend_two=login).exists()]
+                                 not Friends.objects.filter(login_friend_one=user.login,
+                                                            login_friend_two=login).exists()]
 
             if potential_friends:
                 serializer = UserSerializer(potential_friends, many=True)
@@ -149,17 +150,41 @@ class FindFriendView(APIView):
             return Response("No users found", status=status.HTTP_404_NOT_FOUND)
 
 
-class ChatView(APIView):
+class CreateChat(APIView):
     def post(self, request, login):
-        friends = request.data.get('friends', [])
+        data = request.data
 
-        chat = Chats.objects.create(chat_name="", chat_type="")
+        friends = data.get('friends', [])
+        chat_name = data.get('chat_name')
 
-        user = Users.objects.get(login=login)
-        ChatMembers.objects.create(chat_id=chat, login=user.login)
+        chat = Chats.objects.create(chat_name=chat_name, chat_type="")
+
+        user = get_object_or_404(Users, login=login)
+        ChatMembers.objects.create(chat_id=chat, login=user)
 
         for friend in friends:
-            user = Users.objects.get(login=friend)
-            ChatMembers.objects.create(chat_id=chat, login=user.login)
+            user = get_object_or_404(Users, login=friend)
+            ChatMembers.objects.create(chat_id=chat, login=user)
 
-        return Response(status=status.HTTP_200_OK)
+        return Response("success", status=status.HTTP_200_OK)
+
+
+class GetLocations(APIView):
+    def post(self, request):
+        serializer = LocationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, login):
+        friends_locations = self.get_friends_locations(login)
+        return Response(friends_locations, status=status.HTTP_200_OK)
+
+    def get_friends_locations(self, login):
+        friends = Friends.objects.filter(Q(login_friend_one=login) | Q(login_friend_two=login))
+        friend_logins = [friend.login_friend_one.login if friend.login_friend_one.login != login else friend.login_friend_two.login for friend in friends]
+        friend_locations = Locations.objects.filter(login__in=friend_logins)
+        serialized_locations = LocationSerializer(friend_locations, many=True).data
+        return serialized_locations
