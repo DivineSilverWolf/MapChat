@@ -1,0 +1,29 @@
+version: "3.9"
+
+
+services:
+
+  telgis:
+    build: ./Telgis_Backend
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      - ./Telgis-Backend:/src/Telgis-Backend-Python
+    ports:
+      - 8000:8000
+    env_file:
+      - config.env
+    depends_on:
+      - postgres
+
+  postgres:
+    restart: always
+    image: postgres:14.4
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    env_file:
+      - ./config.env
+
+    ports:
+      - "5432:5432"
