@@ -1,6 +1,5 @@
 import json
 
-
 from django.db.models import Q
 import rest_framework.request
 from django.contrib.auth.hashers import make_password, check_password
@@ -10,11 +9,11 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
-
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .decorators import check_auth_schema, check_reg_schema, check_get_schema
 from .models import Users, Friends, Chats, ChatMembers, Locations
 from .serializers import UserSerializer, LocationSerializer
 
@@ -39,7 +38,7 @@ class UserView:
         if len(login) < 6 or len(login) > 20:
             return JsonResponse({'message': 'Login must be between 6 and 20 characters'}, status=400)
         if not login.isalnum():
-            return JsonResponse({'message': 'Login can only contain letters and numbers'}, status=400 )
+            return JsonResponse({'message': 'Login can only contain letters and numbers'}, status=400)
 
         if len(password) < 6 or len(password) > 20:
             return JsonResponse({'message': 'Password must be between 6 and 20 characters'}, status=400)
@@ -155,6 +154,12 @@ class FindFriend(APIView):
         else:
             return Response("No users found", status=status.HTTP_404_NOT_FOUND)
 
+    def get(self, request, login):
+
+        users = Users.objects.all().exclude(login=login)
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class CreateChat(APIView):
     def post(self, request, login):
@@ -177,50 +182,54 @@ class CreateChat(APIView):
 
 class GetLocations(APIView):
     def post(self, request):
-        serializer = LocationSerializer(data=request.data)
+        data = request.data
+        print(data, "ITS COORDINATES")
+        serializer = LocationSerializer(data=data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request, login):
-        friends_locations = self.get_friends_locations(login)
+    def get(self, request):
+        data = request.data
+        print(data, "ITS GETLOCATIONS")
+        friends_locations = self.get_friends_locations(data['login'])
         return Response(friends_locations, status=status.HTTP_200_OK)
 
     def get_friends_locations(self, login):
         friends = Friends.objects.filter(Q(login_friend_one=login) | Q(login_friend_two=login))
-        friend_logins = [friend.login_friend_one.login if friend.login_friend_one.login != login else friend.login_friend_two.login for friend in friends]
+        friend_logins = [
+            friend.login_friend_one.login if friend.login_friend_one.login != login else friend.login_friend_two.login
+            for friend in friends]
         friend_locations = Locations.objects.filter(login__in=friend_logins)
         serialized_locations = LocationSerializer(friend_locations, many=True).data
         return serialized_locations
 
-from .decorators import *
-from .models import Users
 
-
-class AddFriend(APIView):
-
-    def post(self, request, login):
-        pass
-
-
-class FriendsList(APIView):
-
-    def post(self, request):
-        pass
-
-
-class FriendsConfirm(APIView):
-
-    def get(self, request):
-        pass
-
-
-class FindFriends(APIView):
-
-    def post(self, request, login):
-        pass
+# class AddFriend(APIView):
+#
+#     def post(self, request, login):
+#         pass
+#
+#
+# class FriendsList(APIView):
+#
+#     def post(self, request):
+#         pass
+#
+#
+# class FriendsConfirm(APIView):
+#
+#     def get(self, request):
+#         pass
+#
+#
+# class FindFriends(APIView):
+#
+#     def post(self, request, login):
+#         pass
 
 
 @check_auth_schema
@@ -251,7 +260,7 @@ class Authentication(APIView):
 class Registration(APIView):
 
     @csrf_exempt
-    def post(self, request):        #: rest_framework.request.Request
+    def post(self, request):  #: rest_framework.request.Request
         try:
             data = request.data
             print(data)
@@ -311,4 +320,3 @@ class UserIdDetails(APIView):
         user = get_object_or_404(Users, login=login)
         user.delete()
         return JsonResponse({'status': 'success'})
-

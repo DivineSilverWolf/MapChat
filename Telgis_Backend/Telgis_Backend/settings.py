@@ -57,10 +57,13 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Укажите адрес вашего фронтенда
-    # Добавьте другие разрешенные адреса при необходимости
 
 ]
+CORS_ORIGIN_ALLOW_ALL = True
 
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+]
 # Разрешите методы, которые ваш бэкенд должен поддерживать
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -71,7 +74,9 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-
+CORS_ALLOW_HEADERS = ('content-disposition', 'accept-encoding',
+                      'content-type', 'accept', 'origin', 'Authorization',
+                      'access-control-allow-methods')
 # Разрешите заголовки, которые ваш бэкенд должен поддерживать
 # CORS_ALLOW_HEADERS = [
 #     'accept',
@@ -166,7 +171,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "API Telgis",  # название проекта
-    "VERSION": "0.2.0",  # версия проекта
+    "VERSION": "0.2.7",  # версия проекта
     "SERVE_INCLUDE_SCHEMA": False,  # исключить эндпоинт /schema
     # "SWAGGER_UI_SETTINGS": {
     #     "filter": True,  # включить поиск по тегам

@@ -1,13 +1,14 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Messages, Chats, ChatMembers, Locations, Friends, Users
+from .models import *
 
 
 # class UserAdmin(admin.ModelAdmin):
 #     list_display = ('username', 'email', 'avatar_url')
 
 
+admin.site.register(FriendsStatus)
 
 admin.site.register(Users)
 admin.site.register(Messages)
