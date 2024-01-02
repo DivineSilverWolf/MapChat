@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -17,28 +20,37 @@ import java.util.Set;
 @Entity
 public class User {
     @Id
-    String username;
+    String login;
     String password;
-    String avatarURL;
-    String email;
-    Boolean isOnline;
 
-    @OneToOne
-    @JoinColumn(name = "location_id")
-    Location location;
-
-    @NotEmpty
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "chat_user",
-            joinColumns = { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "chat_id") })
-    Set<Chat> chats;
-
+    Double latitude;
+    Double longitude;
+    Date timestamp;
 
     @NotEmpty
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_friend",
             joinColumns = { @JoinColumn(name = "user_id") },
-            inverseJoinColumns = { @JoinColumn(name = "friend_id") })
-    Set<User> friends;
+            inverseJoinColumns = { @JoinColumn(name = "friend_id") }
+    )
+    List<User> friends;
+
+    @NotEmpty
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "Confirm",
+            joinColumns = { @JoinColumn(name = "user1_id") },
+            inverseJoinColumns = { @JoinColumn(name = "user2_id") }
+    )
+    List<User> friendRequests;
+
+    public User(String login, String password) {
+        this.login = login;
+        this.password = password;
+    }
+
+    public User(String login, Double latitude, Double longitude) {
+        this.login = login;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 }
